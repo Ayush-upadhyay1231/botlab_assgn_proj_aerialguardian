@@ -1,0 +1,44 @@
+# configs/pipeline.yaml
+# ── The Aerial Guardian — Master Configuration ──────────────────────────
+
+pipeline:
+  name: aerial_guardian
+  version: "1.0"
+
+# ── Model ────────────────────────────────────────────────────────────────
+detector:
+  weights: models/weights/best.pt # Path to your trained YOLOv8 weights
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  img_size: 1280
+  device: "0" # GPU index; "cpu" for CPU only
+  use_sahi: true
+  slice_size: 512
+  slice_overlap: 0.2
+
+# ── Tracker ──────────────────────────────────────────────────────────────
+tracker:
+  track_thresh: 0.25
+  track_buffer: 60
+  match_thresh: 0.80
+  frame_rate: 25
+  min_hits: 3
+  tail_length: 30
+
+# ── Motion Compensation ──────────────────────────────────────────────────
+motion_compensation:
+  enabled: true
+  max_corners: 300
+  refresh_every_n_frames: 15
+
+# ── Output ───────────────────────────────────────────────────────────────
+output:
+  save_video: true
+  show_live: false # Set true for real-time display (reduces FPS)
+  fps_window: 30 # Frames for rolling FPS average
+  video_codec: mp4v # Windows-compatible codec
+
+# ── Optimization ─────────────────────────────────────────────────────────
+optimization:
+  use_fp16: true # FP16 inference (requires CUDA GPU)
+  skip_frames: 0 # 0 = process every frame; 1 = skip every other

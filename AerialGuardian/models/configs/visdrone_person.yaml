@@ -1,0 +1,54 @@
+# models/configs/visdrone_person.yaml
+# Hyperparameter config for VisDrone small object detection
+
+# ── Model ────────────────────────────────────────────
+model: yolov8n.pt # start from COCO pretrained weights
+task: detect
+
+# ── Dataset ──────────────────────────────────────────
+data: data/processed/dataset.yaml
+imgsz: 1280 # Critical: larger image → small objects have more pixels
+batch: 8 # Reduce to 4 if VRAM < 8GB; increase to 16 if > 12GB
+
+# ── Training Duration ────────────────────────────────
+epochs: 150
+patience: 30 # Early stopping
+
+# ── Optimizer ────────────────────────────────────────
+optimizer: AdamW
+lr0: 0.001
+lrf: 0.01 # Final LR = lr0 * lrf
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 5.0
+warmup_momentum: 0.8
+
+# ── Loss Weights ─────────────────────────────────────
+box: 7.5 # Higher box loss → tighter bbox regression
+cls: 0.5
+dfl: 1.5
+
+# ── Augmentation ─────────────────────────────────────
+# Drone-specific: strong spatial augmentation, conservative color
+mosaic: 1.0 # CRITICAL for small objects — mixes 4 images
+mixup: 0.15
+copy_paste: 0.1 # Paste person instances → increases small object density
+degrees: 5.0 # Slight rotation (drones tilt during flight)
+translate: 0.1
+scale: 0.75 # Scale jitter: 0.25× to 1.75× — simulates altitude changes
+shear: 2.0
+perspective: 0.0001 # Slight perspective (drone angle changes)
+flipud: 0.0 # Aerial: top-down, so vertical flip is unrealistic
+fliplr: 0.5
+hsv_h: 0.015 # Minimal hue shift — aerial color is consistent
+hsv_s: 0.5
+hsv_v: 0.4 # Value shift handles lighting changes (dawn/dusk/clouds)
+
+# ── NMS ──────────────────────────────────────────────
+conf: 0.001 # Very low conf during training eval — don't miss small objects
+iou: 0.6 # Higher IoU threshold for NMS — aerial crowds pack tightly
+
+# ── Output ───────────────────────────────────────────
+project: models/runs
+name: visdrone_person_v1
+save_period: 10 # Save checkpoint every N epochs
